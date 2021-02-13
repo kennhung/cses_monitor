@@ -72,6 +72,32 @@ func getURL(id string) string {
 	return fmt.Sprintf("https://cses.fi/problemset/user/%s?userId=%s", id, id)
 }
 
+func confirmCheck(userId string, p Problem, callback func(nProb Problem)) {
+	c := colly.NewCollector()
+
+	c.OnHTML(".task-score", func(e *colly.HTMLElement) {
+		if e.Attr("href") == p.URL {
+			problem := Problem{}
+			if strings.Index(e.Attr("class"), "full") != -1 {
+				problem.Status = 2
+			} else if strings.Index(e.Attr("class"), "zero") != -1 {
+				problem.Status = 1
+			} else {
+				problem.Status = 0
+			}
+			problem.Name = e.Attr("title")
+			problem.URL = e.Attr("href")
+
+			callback(problem)
+			return
+		}
+	})
+
+	c.Visit(getURL(userId))
+
+	c.Wait()
+}
+
 func run(userInfos *UserInfos, list []string, delayTime int) {
 	c := colly.NewCollector()
 
@@ -134,13 +160,27 @@ func run(userInfos *UserInfos, list []string, delayTime int) {
 			}
 
 			checkDiff(prev, now, func(p Problem, n Problem) {
-				sendNotification(
-					(*userInfos)[userId].Name,
-					n.Name,
-					fmt.Sprintf("https://cses.fi%s", n.URL),
-					n.Status)
-
 				fmt.Println((*userInfos)[userId].Name, n.Name, n.Status)
+
+				if n.Status == 1 {
+					go func() {
+						time.Sleep(60 * time.Second)
+
+						confirmCheck(userId, n, func(nProb Problem) {
+							sendNotification(
+								(*userInfos)[userId].Name,
+								nProb.Name,
+								fmt.Sprintf("https://cses.fi%s", nProb.URL),
+								nProb.Status)
+						})
+					}()
+				} else {
+					sendNotification(
+						(*userInfos)[userId].Name,
+						n.Name,
+						fmt.Sprintf("https://cses.fi%s", n.URL),
+						n.Status)
+				}
 			})
 
 			time.Sleep(time.Duration(delayTime) * time.Microsecond)
