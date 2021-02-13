@@ -27,7 +27,6 @@ type UserInfos = map[string]*UserInfo
 func checkDiff(prev map[string]Problem, now map[string]Problem, callback func(prev Problem, now Problem)) {
 	for k, v := range prev {
 		if now[k].Status != v.Status {
-			fmt.Println(now[k].Status, v.Status)
 			callback(v, now[k])
 		}
 	}
