@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine
+FROM golang:1.14-alpine as builder
 
 ENV GO111MODULE=on
 
@@ -12,7 +12,10 @@ COPY . .
 
 RUN go build -o main .
 
+# production environment
+FROM ubuntu:latest
+
 WORKDIR /dist
-RUN cp /build/main .
+COPY --from=builder /build/main .
 
 CMD ["/dist/main"]
