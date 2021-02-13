@@ -16,6 +16,6 @@ RUN go build -o main .
 FROM ubuntu:latest
 
 WORKDIR /dist
-COPY --from=builder /build/main .
+COPY --from=builder /build/main /dist/main
 
 CMD ["/dist/main"]
