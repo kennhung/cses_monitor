@@ -1,13 +1,18 @@
-FROM hayd/alpine-deno:1.5.2
+FROM golang:1.14-alpine
 
-WORKDIR /app
+ENV GO111MODULE=on
 
-# Prefer not to run as root.
-USER deno
+WORKDIR /build
 
-# These steps will be re-run upon each file change in your working directory:
-ADD . .
-# Compile the main app so that it doesn't need to be compiled each startup/entry.
-RUN deno cache index.ts
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-CMD ["run","--allow-read", "--allow-env", "--allow-net", "index.ts"]
+COPY . .
+
+RUN go build -o main .
+
+WORKDIR /dist
+RUN cp /build/main .
+
+CMD ["/dist/main"]
