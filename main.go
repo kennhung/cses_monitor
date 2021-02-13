@@ -27,6 +27,7 @@ type UserInfos = map[string]*UserInfo
 func checkDiff(prev map[string]Problem, now map[string]Problem, callback func(prev Problem, now Problem)) {
 	for k, v := range prev {
 		if now[k].Status != v.Status {
+			fmt.Println(now[k].Status, v.Status)
 			callback(v, now[k])
 		}
 	}
@@ -69,8 +70,7 @@ func sendNotification(userName string, probName string, probURL string, status i
 }
 
 func getURL(id string) string {
-	return fmt.Sprintf("http://localhost:8000/%s.html?userId=%s", id, id)
-	//return fmt.Sprintf("https://cses.fi/problemset/user/%s", id)
+	return fmt.Sprintf("https://cses.fi/problemset/user/%s?userId=%s", id, id)
 }
 
 func run(userInfos *UserInfos, list []string, delayTime int) {
@@ -141,7 +141,7 @@ func run(userInfos *UserInfos, list []string, delayTime int) {
 					fmt.Sprintf("https://cses.fi%s", n.URL),
 					n.Status)
 
-				fmt.Printf(n.Name)
+				fmt.Println((*userInfos)[userId].Name, n.Name, n.Status)
 			})
 
 			time.Sleep(time.Duration(delayTime) * time.Microsecond)
