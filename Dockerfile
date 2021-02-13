@@ -13,9 +13,9 @@ COPY . .
 RUN go build -o main .
 
 # production environment
-FROM ubuntu:latest
+FROM alpine
 
-WORKDIR /dist
-COPY --from=builder /build/main /dist/main
+WORKDIR /app
+COPY --from=builder /build/main /app/main
 
-CMD ["/dist/main"]
+CMD ["/app/main"]
