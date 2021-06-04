@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gocolly/colly/v2"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gocolly/colly/v2"
 )
 
 type Problem struct {
@@ -191,6 +192,10 @@ func run(userInfos *UserInfos, list []string, delayTime int) {
 				close(quit)
 			}
 		}()
+	})
+
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
 	})
 
 	if i < len(list) {
